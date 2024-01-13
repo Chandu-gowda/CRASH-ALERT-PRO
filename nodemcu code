@@ -1,0 +1,148 @@
+//girish2228@gmail.com - User 
+//changowda43@gmail.com - User 
+//projectiot2023
+
+
+ #define BLYNK_TEMPLATE_ID "TMPL3VNjJ6s3Y"
+#define BLYNK_TEMPLATE_NAME "Vehicle accident"
+#define BLYNK_AUTH_TOKEN "UXQAoQIDyWlIQVO1pUi6vFCS_ILhC2Wr"
+
+
+/* Comment this out to disable prints and save space */
+#define BLYNK_PRINT Serial
+
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+// Your WiFi credentials.
+// Set password to "" for open networks.
+char ssid[] = "projectiot";
+char pass[] = "123456789";
+
+#define VPIN_1    V0  // Clash
+#define VPIN_2    V1  // Acc_Status
+#define VPIN_3    V2  // Gas
+#define VPIN_4    V3  // Flame
+#define VPIN_5    V4  // Temp_St
+#define VPIN_6    V5  // Temp
+#define VPIN_7    V6  // GPS_Lt
+#define VPIN_8    V7  // GPS_Lg
+#define VPIN_9    V8  // GPS_Lg
+
+
+BLYNK_CONNECTED()
+{ 
+
+  Blynk.syncVirtual(V0);  
+  Blynk.syncVirtual(V1);  
+  Blynk.syncVirtual(V2);  
+  Blynk.syncVirtual(V3);  
+  Blynk.syncVirtual(V4); 
+  Blynk.syncVirtual(V5);  
+  Blynk.syncVirtual(V6);  
+  Blynk.syncVirtual(V7);  
+  Blynk.syncVirtual(V8); 
+
+  
+}
+void setup()
+{
+  // Debug console
+  Serial.begin(9600);
+  delay(100);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+}
+
+void loop()
+{
+  Blynk.run();
+  if (Serial.available()>0) 
+  {
+  char a=Serial.read();
+  //Serial.print(a);
+
+
+  if(a=='v')
+{  
+  Blynk.virtualWrite(VPIN_1,HIGH); 
+}
+else if (a=='V')
+{
+  Blynk.virtualWrite(VPIN_1,LOW); 
+}
+  
+ if(a=='T')
+{  
+    int T=Serial.parseInt(); 
+    Blynk.virtualWrite(VPIN_5,HIGH);//Distance 1
+    Blynk.virtualWrite(VPIN_6,T);//Distance 1
+}
+else if (a=='t')
+{
+  int t=Serial.parseInt(); 
+  Blynk.virtualWrite(VPIN_5,LOW);//Distance 1
+  Blynk.virtualWrite(VPIN_6,t);//Distance 1
+}
+  
+if(a=='F')//Flame
+    {  
+      
+      Blynk.virtualWrite(VPIN_4,HIGH); 
+    }
+  
+if(a=='f')//Flame
+    {  
+      
+      Blynk.virtualWrite(VPIN_4,LOW); 
+    }
+
+
+if(a=='G')//Gas
+    {  
+      
+      Blynk.virtualWrite(VPIN_3,HIGH); 
+    }
+
+
+if(a=='g')//Gas
+    {  
+      
+      Blynk.virtualWrite(VPIN_3,LOW); 
+    }
+    
+if(a=='Y')//Position
+    {  
+      
+      Blynk.virtualWrite(VPIN_2,HIGH); 
+    }
+
+if(a=='y')//Position
+    {  
+      
+      Blynk.virtualWrite(VPIN_2,LOW); 
+    }
+
+
+
+        
+if(a=='L')
+{  
+    float L=Serial.parseFloat();   ///Latitute
+    Blynk.virtualWrite(VPIN_7,L); 
+}
+
+if(a=='P')
+{  
+    float p=Serial.parseFloat();   ///LANe
+    Blynk.virtualWrite(VPIN_8,p); 
+}
+if(a=='U')
+{  
+    int u=Serial.parseInt();   ///Distance
+    Blynk.virtualWrite(VPIN_9,u); 
+}
+
+
+}  
+}
