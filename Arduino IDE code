@@ -1,0 +1,759 @@
+#include <DHT.h>
+
+/*******************DHT11************************************/
+#include "DHT.h"
+#define DHTPIN 9     // what pin we're connected to
+#define DHTTYPE DHT11   // DHT 11 
+String DHT_status;
+DHT dht(DHTPIN, DHTTYPE);
+String Temp_status;
+int present_condition = 0;
+int previous_condition = 0;
+
+const int trigPin = 11;
+const int echoPin = 12;
+
+long duration;
+int distance;
+
+int x,h;
+int a,b,d,e,q;
+
+
+/****************************************/
+int H,T,S,p,m,L,g;
+///////////////////////////////////////
+/*****************************************/
+////////////////////////////////////GPS START///////////////////////////////////
+
+/***********************************gps**************************************/
+/************************software_serial***************************/
+String inputString = "";         // a String to hold incoming data
+bool stringComplete = false;  // whether the string is complete
+/***********************************************************************/
+
+char inputString1[100];             //a string to hold incomming data
+bool stringComplete1 = false;       //whether string is complete
+unsigned char condition_check_variable;
+
+//*****************************************************************************
+unsigned int i = 0;
+unsigned int k = 0;
+unsigned int z = 0;
+//*****************************************************************************
+
+ char timee[10];
+ char gps_fix;
+ char lattitude[15];
+ char lat_dir;
+ char longitude[15];
+ char lon_dir;
+ char date[11];
+ char GPS_information[100];
+ char final_lattitude[15];
+ char final_longitude[15];
+//******************************************************************************
+unsigned int split_variable; //',' splitted
+unsigned int Gps_infomation_variable = 0;
+int Gps_infomation_variable1;
+//***********************for time*****************************************************
+unsigned int seconds;
+unsigned int  minits;
+unsigned int hours;
+//***************************************************************************************
+char indian_time_gps[9];
+unsigned int lattitude_length;
+unsigned int longitude_length;
+//****************************************************************************************
+char gps_degree[4];
+char gps_minutes[15];
+float decimal_lattitude;
+float decimal_longitude;
+//**********************************************************************************************
+int dot_length;
+String G;
+String help;
+//***********************************************************************************************
+int GPS_GPRMC(String get_message);
+/************************************************************************************************/
+/***********************************************************************************************/
+String gps_Sensor;
+/***********************************************************************************************/
+char inChar;
+/***********************************************************************************************/
+/***********************************************************************************************/
+int webdata_len;
+int web_data_len1;
+/***********************************************************************************************/
+/************************************************************************************************/
+char break_char = ' ';
+int c;
+/************************************************************************************************/
+//*************************************************************************//
+void setup()
+{
+   pinMode(8,INPUT);
+   pinMode(10,INPUT);
+   pinMode(11,INPUT);
+   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+   pinMode(echoPin, INPUT); // Sets the echoPin as an Input 
+   pinMode(3,OUTPUT);//motor 
+   pinMode(2,OUTPUT);
+   pinMode(5,OUTPUT);
+   pinMode(4,OUTPUT);
+   Serial.begin(9600);
+   dht.begin();
+}    
+    
+void loop()
+{
+
+if((a==0)&&(b==0)&&(d==0)&&(e==0)&&(q==0))
+{
+  forward();
+  //Serial.print("Hello");
+ }
+ else if (q==1) 
+ {
+  stopp();
+  gps(help);
+ // Serial.print("Hi");
+  }
+
+   else if (e==1)
+ {
+  stopp();
+
+// // Serial.print("Hi");
+  }
+ 
+/**else if ((a=1)||(b=1)||(d=1)||(e=1))
+{
+  stopp();
+  // Serial.println("N");  
+}
+else if((f=1)) 
+{
+  stopp();
+  gps(help);
+  // Serial.println("N");  
+}
+*/
+
+  
+  //String stringThree = e + a + b + d;
+// String result = String(e) + String(a) + String(b) + String(d);
+ // Serial.println(  result);
+  
+ dht11();   
+ gyro();
+
+ // ultrasonic Sensor 
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH); 
+  distance = duration * 0.034 / 2;
+  Serial.print('U');
+  Serial.print(distance);
+
+  if (distance>10)
+   {
+     Serial.print("V");
+     e=0;
+  // Serial.print(e);
+   // forward();
+    //delay(100);
+   
+   
+   }
+   else 
+   {
+    Serial.print("v");
+   // stopp();
+    e=1;
+    
+   }
+  
+//previous_condition = present_condition;
+//present_condition = digitalRead(A5); // Reading digital data from the A5 Pin of the Arduino.
+////Serial.println(present_condition);
+//if (previous_condition != present_condition) 
+//{
+////led_blink();
+//e=1;
+//Serial.print("v");
+//delay(1000);
+//
+//}
+//else 
+//{
+//e=0;
+//Serial.println("V");
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+// 
+// int Vib=digitalRead(11);
+// if (Vib==HIGH)
+//  {
+//    Serial.print("V");
+//    e=0;
+//   // Serial.print(e);
+//    delay(100);
+//    }
+//  else
+//  {
+//  Serial.print("v");
+//  e=1;
+//  delay(1000);
+//    }
+// 
+  
+
+  
+
+
+  int Gas =  digitalRead(10);
+  if (Gas == LOW)
+  {
+    Serial.print("G");
+    a=1;
+  }
+  else
+  {
+    Serial.print("g");
+    a=0;
+    }
+
+  
+  
+
+
+  
+  int flame = digitalRead(8);
+  if (flame == LOW)
+  {
+    Serial.print("F");
+    b=1;
+  }
+  else
+  {
+    Serial.print("f");
+    b=0;
+    }
+  
+ }             
+          
+void dht11()
+{  
+        h = dht.readHumidity();
+          x = dht.readTemperature();
+        float f = dht.readTemperature(true);
+
+        
+        if (isnan(h) || isnan(x) || isnan(f)) 
+        {
+          Serial.println("Failed to read from DHT sensor!");
+          return;
+        }
+        
+        /****************************************/
+    
+      if(x > 35)
+        {
+                Serial.print('T');
+                Serial.print(x);
+                delay(500);
+                d=1;
+                  
+        }
+        else
+       {
+//
+                     Serial.print('t');
+                     Serial.print(x);
+                    delay(500);
+                    d=0;
+        }
+
+         delay(500);
+
+}
+
+
+
+void forward()
+{
+  digitalWrite(3,HIGH);
+  digitalWrite(2,LOW);
+  digitalWrite(5,HIGH);
+  digitalWrite(4,LOW);  
+  }
+
+void stopp()
+{
+  digitalWrite(3,LOW);
+  digitalWrite(2,LOW);
+  digitalWrite(5,LOW);
+  digitalWrite(4,LOW);  
+  }
+
+void gyro()
+
+{
+          int x = analogRead(A0);
+          int y = analogRead(A1);
+          int z = analogRead(A2);
+           
+          x = x / 100;
+          y = y / 100;
+          z = z / 100;
+          /**************************************************/
+ // Serial.print(x);
+  //Serial.print(y);
+ // Serial.print(z);
+  //delay(1000);
+
+    if(x==3&&y==3&&z==2)
+      {       
+      q=0;
+      //forward();
+       Serial.print("y"); 
+         delay(5);  
+      }
+        
+    else
+      {       
+      q=1;
+      //stopp();
+       Serial.print("Y"); 
+         delay(5);    
+      }
+}
+
+
+
+void gps(String msg)
+{
+
+
+                                while(Serial.available())
+                                {
+                          
+                                     inChar = (char)Serial.read();
+                                    //Serial.println(inChar);
+                                    
+                                      
+                                    if(inChar != '\n')
+                                      {
+                                        
+                                           if ( inChar == '$')
+                                           {
+                                               i=0;
+                                               inputString1[0]= inChar;
+                                             
+                                           }
+                                           else if(inputString1[0] == '$')
+                                           {
+                                              i++;
+                                              inputString1[i]= inChar;
+                                           }
+                                            
+                                        
+                                      }
+                    
+                                   else if (inChar == '\n')
+                                      {
+                                            
+                                            stringComplete = true;
+                                            //Serial.println(inputString1);
+                                            
+                                            i=0;
+                                            if(  (inputString1[0] == '$') && (inputString1[1] == 'G') && (inputString1[2] == 'P') && (inputString1[3] == 'R')  && (inputString1[4] == 'M') && (inputString1[5] == 'C'))
+                                            {
+                                            //Serial.println(inputString1);
+                                            GPS_GPRMC(inputString1 ,msg);
+                                            Serial.flush();
+                    
+                                            }
+                                        
+                                      }
+                                 
+                            
+                         }
+        
+          
+}
+
+
+/****************************************gps_function********************************************************************************************/
+int GPS_GPRMC(String inputString,String get_message)
+{
+
+            //**********************************************************************************************************************************************************************
+            
+            Gps_infomation_variable = 0;
+            
+            GPS_information[0]='$';
+            GPS_information[1]='G';
+            GPS_information[2]='P';
+            GPS_information[3]='S';
+            
+            if(  (inputString[0] == '$') && (inputString[1] == 'G') && (inputString[2] == 'P') && (inputString[3] == 'R')  && (inputString[4] == 'M') && (inputString[5] == 'C'))
+            {
+
+                         k=0;
+                         i=0;
+                         split_variable=0;
+                         
+                         Gps_infomation_variable=4;
+
+                        //Serial.println("******");
+
+                        //*********************************** split time,lat,lon,date using ',' character *********************************************************
+
+                         while(inputString[i] != '\0')
+                         {
+              
+                               if(inputString[i] == ',')
+                                    
+                                 {
+
+                                          split_variable++;  
+                                          z=0;
+                                          //i++;
+                                                                                                             
+                                 }
+                              
+  
+                                switch (split_variable)
+                                {
+                            
+                                        case 1:
+      
+                                            timee[z] = inputString[i];                                                 
+                                            z++;
+                                            break;
+    
+                                        case 2:
+    
+                                            gps_fix = inputString[i];
+                                            
+                                            GPS_information[Gps_infomation_variable] = gps_fix ;
+                                            
+                                            Gps_infomation_variable++;
+                                                                                       
+                                            break; 
+    
+                                        case 3:
+
+                                            
+                                            lattitude[z] = inputString[i];
+                                            
+                                            GPS_information[Gps_infomation_variable] = lattitude[z];
+                                            
+                                            Gps_infomation_variable++;
+                                            z++;
+                                            
+                                            break;
+    
+                                        case 4:
+          
+                                            lat_dir = inputString[i];
+                                            
+                                            GPS_information[Gps_infomation_variable] = lat_dir ;
+                                            
+                                            Gps_infomation_variable++;
+
+                                            break;
+          
+                                        case 5:
+          
+                                            longitude[z] = inputString[i];
+    
+                                            GPS_information[Gps_infomation_variable] = longitude[z];
+                                            
+                                            Gps_infomation_variable++;
+
+                                            longitude_length = z;
+
+                                            z++;
+                                            
+                                            break;
+          
+                                        case 6:
+          
+                                            lon_dir = inputString[i];
+      
+                                            GPS_information[Gps_infomation_variable] = lon_dir ;
+                                            
+                                            Gps_infomation_variable++;
+                                            
+                                            break;
+          
+                                        case 9:
+                                        
+                                            date[z] = inputString[i];
+
+                                            GPS_information[Gps_infomation_variable] = date[z] ;
+                                            
+                                            Gps_infomation_variable++;
+
+                                            z++;
+                                            
+                                            break; 
+                                                                                        
+                                        case 11:                                                
+                                             z=0;
+
+                                    
+                               }
+
+                                i++;
+                         }
+
+
+                 //******************************************** indian_time *******************************************************************************
+
+                         hours = (((timee[1]-48)*10)+(timee[2] - 48)) + 5;
+                                               
+                         if (hours >=24 )
+                          {
+                              hours = hours-24;
+                          }
+                      
+                        minits = (((timee[3]-48)*10)+(timee[4] - 48))+30;
+                      
+                         if (minits >=60)
+                           {
+                                minits = minits-60;
+                      
+                                hours = hours+1;
+                           }
+                                
+                        seconds = ((timee[5]-48)*10)+(timee[6]-48);
+            
+            
+                         indian_time_gps[0]=(hours/10)+48;
+                         indian_time_gps[1]=(hours%10)+48;
+                         indian_time_gps[2]=':';
+                         
+                         indian_time_gps[3]=(minits/10)+48;
+                         indian_time_gps[4]=(minits%10)+48;
+                         indian_time_gps[5]=':';
+                         
+                         indian_time_gps[6]=(seconds/10)+48;
+                         indian_time_gps[7]=(seconds%10)+48;   
+                                         
+                     
+                     GPS_information[Gps_infomation_variable] = ',';
+                     Gps_infomation_variable++;
+                     
+                     for(i=0;indian_time_gps[i]!='\0';i++)
+                     {
+                           GPS_information[Gps_infomation_variable] = indian_time_gps[i];
+                           Gps_infomation_variable++;
+                      
+                     }
+                     
+                    // Serial.print("************");
+
+               //****************************************here we calculated decimal values for map*************************************************************
+
+               //**************************************** check gps fix or not **********************************************************************************
+                    
+                    
+                     //Serial.println(final_lat_long);
+
+                     if (gps_fix == 'V')
+                     {
+                      
+                           Gps_infomation_variable1 = 0;
+
+                           while( GPS_information[Gps_infomation_variable1] != '\0')
+                           {
+                                      if(Gps_infomation_variable1 < Gps_infomation_variable)
+                                      {
+                                          //Serial.print( GPS_information[Gps_infomation_variable1]);
+                                          Gps_infomation_variable1++;
+                                      }
+                                      else
+                                      {
+                                           //Serial.print( GPS_information[Gps_infomation_variable1]='\0');
+                                           Gps_infomation_variable1++;
+                                      }
+                              
+                           }
+
+                           String nf_final_lat_long =  String("GPS_not_fix_")+String (get_message);
+                         
+                             //lcd.setCursor(14,1);
+                            // lcd.print("GN");
+                             //Serial.print(" Gps:Not         ");
+
+                           
+                           webdata_len = nf_final_lat_long .length();
+                                                                            
+                          String send_data  = String(webdata_len)+"_"+nf_final_lat_long;
+
+        
+                            // Serial.print('Z');
+//                          Serial.print(send_data);
+//                         
+//                          delay(2000);
+
+                       
+
+
+                          break_char ='s';
+                          
+                         // String iot = send_data.substring(0,2);
+                          //int len=iot.toInt();
+                          //String iot1 = send_data.substring(3,(len+3));
+                          //Serial.println("******************************");
+                          //Serial.print(iot1);
+                          //Serial.println("******************************");
+
+              
+                           //Serial.print(String(webdata_len)+"_"+nf_final_lat_long);
+                           
+
+                 
+                          
+                           /*********************************************************************************************************/
+
+                       
+                     }
+                     else if(gps_fix == 'A')
+                     {
+                      
+                             
+                           //  lcd.setCursor(14,1);
+                         //   lcd.print("GY");
+                         //Serial.print("Y");
+                            
+                             float decimal_lattitude = lat_long_calculation(lattitude);   
+                             float decimal_longitude = lat_long_calculation(longitude);
+//
+                          
+                           //  lcd.setCursor(3,0);
+                           //  lcd.print("L:");
+                          //   lcd.setCursor(5,0);
+                           //  lcd.print(String(float(decimal_lattitude),10));
+                           //  lcd.print(double(decimal_lattitude),7);
+                           //  lcd.setCursor(10,0);
+                           //  lcd.print("LG:");
+                           //  lcd.setCursor(12,0);
+                            // lcd.print(String(float(decimal_longitude),10));  
+                         // lcd.print(double(decimal_longitude),7);
+                       
+//
+//                             lcd.setCursor(10,1);
+//                             lcd.print("G:Send");
+
+                             String final_lat_long =  "Lat:"+String(float(decimal_lattitude),10)+String('_')+"LG:"+String(float(decimal_longitude),10)+"_"+String(get_message);
+                             webdata_len = final_lat_long.length();
+
+                             Serial.print('L');
+                             Serial.print(double(decimal_lattitude),7);
+                             delay(20);
+                             Serial.print('P');
+                             Serial.print(double(decimal_longitude),7);
+                             delay(20);
+//                           Serial.print(String(webdata_len)+"Help"+final_lat_long);
+//                           delay(20);     
+//                           delay(4000);
+
+                             break_char ='s';
+//                           delay(1000);
+                             
+                            
+                             
+                                    
+                                                                                                       
+                     }
+                                    
+            }
+
+          //**********************************************************CLEAR*************************************************************************************************************
+          for(i=0;inputString[i]!='\0';i++)
+          {
+                        inputString[i]='\0';
+          }
+         // Serial.print("\n");
+
+              
+}
+
+
+float lat_long_calculation(char *gps_location_lat_lon)
+{
+  
+
+                int z,l,total_length;
+               
+                int dot_length;
+
+                char decimal_gps[15];
+
+
+                
+                for(z=0;gps_location_lat_lon[z]!='\0';z++)
+                 {                     
+                     decimal_gps[z] = gps_location_lat_lon[z];                     
+                    // Serial.print(decimal_gps[z]); 
+                      if(gps_location_lat_lon[z] == '.')
+                      {
+                            dot_length=z;                            
+                      }
+                      total_length=z;                      
+                 }
+                    l=0;
+
+                    for(z=1;z<(dot_length-2);z++)
+                    {
+                       gps_degree[l]=decimal_gps[z];
+                       l++;          
+                    }
+                     
+                  l=0;
+                   
+                  for(z=(dot_length-2);z<=total_length;z++)
+                    {            
+                       gps_minutes[l]=decimal_gps[z];
+                       
+                       l++;                         
+                    }
+
+                    float pi = atof(gps_degree);                     
+                    float pi1 = atof( gps_minutes);                    
+                    float pi3 = pi+(pi1/60);
+
+                    for(z=0;gps_degree[z] !='\0';z++)
+                     {
+                        gps_degree[z]='\0';
+                     }
+                    return(pi3);
+                                       
+}
+
+
+
+
+
+code for arduino
